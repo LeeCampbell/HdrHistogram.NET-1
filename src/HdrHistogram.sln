@@ -24,6 +24,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{D3EBE9D9
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HdrHistogram.Examples", "HdrHistogram.Examples\HdrHistogram.Examples.csproj", "{E210C748-4792-4658-9345-CC073C29EC0B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HdrHistogram.PerformanceTests", "HdrHistogram.PerformanceTests\HdrHistogram.PerformanceTests.csproj", "{2C71C814-3187-49CF-8BAD-47D7AD44EA3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,11 +44,16 @@ Global
 		{E210C748-4792-4658-9345-CC073C29EC0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E210C748-4792-4658-9345-CC073C29EC0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E210C748-4792-4658-9345-CC073C29EC0B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C71C814-3187-49CF-8BAD-47D7AD44EA3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C71C814-3187-49CF-8BAD-47D7AD44EA3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C71C814-3187-49CF-8BAD-47D7AD44EA3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C71C814-3187-49CF-8BAD-47D7AD44EA3A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{2D189069-FE39-42AE-8169-71ABC4D5A87B} = {D3EBE9D9-B40D-4D2F-B76D-16A34FB09A94}
+		{2C71C814-3187-49CF-8BAD-47D7AD44EA3A} = {D3EBE9D9-B40D-4D2F-B76D-16A34FB09A94}
 	EndGlobalSection
 EndGlobal
