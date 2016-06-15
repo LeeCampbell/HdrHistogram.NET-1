@@ -12,21 +12,10 @@ using System.Threading;
 
 namespace HdrHistogram.Utilities
 {
-    internal sealed class AtomicLongArrayWithNormalizingOffset : AtomicLongArray
-    {
-        public AtomicLongArrayWithNormalizingOffset(int length, int normalizingIndexOffset)
-            : base(length)
-        {
-            NormalizingIndexOffset = normalizingIndexOffset;
-        }
-
-        public int NormalizingIndexOffset { get; set; }
-    }
-
     /// <summary>
-    /// This is a basic implementation/port, of just the methods that AtomicHistogram uses
+    /// This is a basic implementation/port, of just the methods that are required internally.
     /// </summary>
-    public class AtomicLongArray
+    internal sealed class AtomicLongArray
     {
         private readonly long[] _counts;
 
@@ -35,11 +24,16 @@ namespace HdrHistogram.Utilities
             _counts = new long[arrayLength];
         }
 
+        public int Length => _counts.Length;
+
         public long this[int index]
         {
             get { return Interlocked.Read(ref _counts[index]); }
+            set
+            {
+                LazySet(index, value);
+            }
         }
-        
 
         public long IncrementAndGet(int index)
         {
@@ -51,13 +45,7 @@ namespace HdrHistogram.Utilities
             return Interlocked.Add(ref _counts[index], value);
         }
 
-        public int Length
-        {
-            get { return _counts.Length; }
-        }
-
-        //Can this be moved to this[int]{set{}} ?
-        public void LazySet(int index, long value)
+        private void LazySet(int index, long value)
         {
             // TODO Revisit this, work out which method is the same as lazySet!!!
             // Note this is only called when we are clearing out the AtomicHistogram (From AtomicHistogram clearCounts()),
@@ -65,7 +53,7 @@ namespace HdrHistogram.Utilities
 
             // From http://stackoverflow.com/questions/8381440/how-is-lazyset-in-javas-atomic-classes-implemented/8420284#8420284
             // For people who like to think of these operations in terms of machine-level barriers on common multiprocessors, lazySet provides a 
-            // preceeding store-store barrier (which is either a no-op or very cheap on current platforms), but no store-load barrier (which is 
+            // preceding store-store barrier (which is either a no-op or very cheap on current platforms), but no store-load barrier (which is 
             // usually the expensive part of a volatile-write)
 
             // From http://mechanitis.blogspot.co.uk/2011/10/mike-and-i-debut-our-new-disruptor.html?showComment=1320601640614&_sm_au_=iVVrQRjv5k6LJ0k5#c4014181423217401642
@@ -85,7 +73,7 @@ namespace HdrHistogram.Utilities
             // flushed out to main memory so that other threads can see the new value.
 
             _counts[index] = value;
-            // Is this right, is that all we need??? We definately don't want an Interlocked here, that's too much!!
+            // Is this right, is that all we need??? We definitely don't want an Interlocked here, that's too much!!
             Thread.MemoryBarrier();
 
             //Volatile.Read (only emits half-fence (acquire fence) as opposed to Thread.VolatileRead which emits a full-fence

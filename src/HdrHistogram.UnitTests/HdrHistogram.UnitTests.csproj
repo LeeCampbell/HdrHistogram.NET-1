@@ -49,9 +49,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConcurrentHistogramTests.cs" />
     <Compile Include="HistogramAssert.cs" />
     <Compile Include="HistogramEncodingTest.cs" />
     <Compile Include="HistogramIterationValueComparer.cs" />
+    <Compile Include="Persistence\ConcurrentHistogramLogReaderWriterTests.cs" />
     <Compile Include="Persistence\HistogramLogExtensions.cs" />
     <Compile Include="Persistence\HistogramLogReaderWriterTestBase.cs" />
     <Compile Include="Persistence\IntHistogramLogReaderWriterTests.cs" />
@@ -64,7 +66,11 @@
     <Compile Include="Persistence\ShortHistogramLogReaderWriterTests.cs" />
     <Compile Include="Persistence\TestCaseGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RecorderTests.cs" />
+    <Compile Include="Recording\RecorderTestWithLShortHistogram.cs" />
+    <Compile Include="Recording\RecorderTestsBase.cs" />
+    <Compile Include="Recording\RecorderTestWithConcurrentHistogram.cs" />
+    <Compile Include="Recording\RecorderTestWithIntHistogram.cs" />
+    <Compile Include="Recording\RecorderTestWithLongHistogram.cs" />
     <Compile Include="ShortHistogramTests.cs" />
   </ItemGroup>
   <ItemGroup>
