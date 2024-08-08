@@ -42,11 +42,17 @@ namespace HdrHistogram.Utilities
         /// <returns>The number of leading zeros.</returns>
         public static int NumberOfLeadingZeros(long value)
         {
+            
+#if NET5_0_OR_GREATER
+            ulong testValue = (ulong)value;
+            return System.Numerics.BitOperations.LeadingZeroCount(testValue);
+#else
             //Optimisation for 32 bit values. So values under 00:16:41.0 when measuring with Stopwatch.GetTimestamp()*, we will hit a fast path.
             //  * as at writing on Win10 .NET 4.6
             if (value < int.MaxValue)
                 return 63 - Log2((int)value);
             return NumberOfLeadingZerosLong(value);
+#endif
         }
 
         private static int NumberOfLeadingZerosLong(long value)

@@ -58,6 +58,7 @@ namespace HdrHistogram.Benchmarking.LeadingZeroCount
                 {"BBarry32BitIfShiftLookupWith64BitShiftBranch_2", LeadingZeroCount.BBarry32BitIfShiftLookupWith64BitShiftBranch_2.GetLeadingZeroCount},
                 {"BBarry32BitIfShiftLookupWith64BitShiftBranch_3", LeadingZeroCount.BBarry32BitIfShiftLookupWith64BitShiftBranch_3.GetLeadingZeroCount},
                 {"BBarryIfShiftLookup", LeadingZeroCount.BBarryIfShiftLookup.GetLeadingZeroCount},
+                {"BitOperations", LeadingZeroCount.IntrinsicOperations.GetLeadingZeroCount}
             };
             ValidateImplementations(expectedData, functions);
         }
@@ -221,6 +222,16 @@ namespace HdrHistogram.Benchmarking.LeadingZeroCount
             return sum;
         }
 
+        [Benchmark]
+        public int BitOperations()
+        {
+            var sum = 0;
+            for (int i = 0; i < _testValues.Length; i++)
+            {
+                sum += LeadingZeroCount.IntrinsicOperations.GetLeadingZeroCount(_testValues[i]);
+            }
+            return sum;
+        }
 
         private class CalculationExpectation
         {

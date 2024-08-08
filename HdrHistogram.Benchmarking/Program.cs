@@ -3,6 +3,8 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Environments;
+using BenchmarkDotNet.Columns;
+using BenchmarkDotNet.Disassemblers;
 
 namespace HdrHistogram.Benchmarking
 {
@@ -10,15 +12,21 @@ namespace HdrHistogram.Benchmarking
     {
         static void Main(string[] args)
         {
-            var manualConfig = ManualConfig.Create(DefaultConfig.Instance);
-            manualConfig.Add(new MemoryDiagnoser());
-            //manualConfig.Add(new BenchmarkDotNet.Diagnostics.Windows.InliningDiagnoser());
-            //manualConfig.Add(HardwareCounter.BranchMispredictions, HardwareCounter.BranchInstructions);
-            var config = manualConfig
-                .With(Job.Clr.With(Jit.LegacyJit))
-                .With(Job.Clr.With(Jit.RyuJit))
-                .With(Job.Core.With(Jit.RyuJit));
-
+            var config = ManualConfig.Create(DefaultConfig.Instance)
+                //.AddDiagnoser(MemoryDiagnoser.Default)
+                .AddColumn(
+                    StatisticColumn.OperationsPerSecond,
+                    StatisticColumn.Mean, StatisticColumn.StdErr, StatisticColumn.StdDev,
+                    StatisticColumn.P0, StatisticColumn.Q1, StatisticColumn.P50, StatisticColumn.P67, StatisticColumn.Q3, StatisticColumn.P80, StatisticColumn.P90, StatisticColumn.P95, StatisticColumn.P100)
+                .AddJob(Job.Default.WithRuntime(ClrRuntime.Net481).WithJit(Jit.LegacyJit))
+                .AddJob(Job.Default.WithRuntime(ClrRuntime.Net481).WithJit(Jit.RyuJit))
+                .AddJob(Job.Default.WithRuntime(CoreRuntime.Core21))
+                .AddJob(Job.Default.WithRuntime(CoreRuntime.Core31))
+                .AddJob(Job.Default.WithRuntime(CoreRuntime.Core50))
+                .AddJob(Job.Default.WithRuntime(CoreRuntime.Core60))
+                .AddJob(Job.Default.WithRuntime(CoreRuntime.Core70))
+                .AddJob(Job.Default.WithRuntime(CoreRuntime.Core80))
+;
             var switcher = new BenchmarkSwitcher(new[] {
                 typeof(LeadingZeroCount.LeadingZeroCount64BitBenchmark),
                 typeof(LeadingZeroCount.LeadingZeroCount32BitBenchmark),

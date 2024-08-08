@@ -149,25 +149,27 @@ namespace HdrHistogram.UnitTests.Persistence
         [InlineData("jHiccup-2.0.7S.logV2.hlog")]
         public void CanReadv2Logs(string logPath)
         {
-            var readerStream = GetEmbeddedFileStream(logPath);
-            var reader = new HistogramLogReader(readerStream);
-            int histogramCount = 0;
-            long totalCount = 0;
-            var accumulatedHistogram = Create(85899345920838, DefaultSignificantDigits);
-            foreach (var histogram in reader.ReadHistograms())
+            using (var readerStream = GetEmbeddedFileStream(logPath))
+            using (var reader = new HistogramLogReader(readerStream))
             {
-                histogramCount++;
-                Assert.IsAssignableFrom<HistogramBase>(histogram);//, "Expected integer value histograms in log file");
+                int histogramCount = 0;
+                long totalCount = 0;
+                var accumulatedHistogram = Create(85899345920838, DefaultSignificantDigits);
+                foreach (var histogram in reader.ReadHistograms())
+                {
+                    histogramCount++;
+                    Assert.IsAssignableFrom<HistogramBase>(histogram);//, "Expected integer value histograms in log file");
 
-                totalCount += histogram.TotalCount;
-                accumulatedHistogram.Add(histogram);
+                    totalCount += histogram.TotalCount;
+                    accumulatedHistogram.Add(histogram);
+                }
+
+                Assert.Equal(62, histogramCount);
+                Assert.Equal(48761, totalCount);
+                Assert.Equal(1745879039, accumulatedHistogram.GetValueAtPercentile(99.9));
+                Assert.Equal(1796210687, accumulatedHistogram.GetMaxValue());
+                Assert.Equal(1441812279.474, reader.GetStartTime().SecondsSinceUnixEpoch());
             }
-
-            Assert.Equal(62, histogramCount);
-            Assert.Equal(48761, totalCount);
-            Assert.Equal(1745879039, accumulatedHistogram.GetValueAtPercentile(99.9));
-            Assert.Equal(1796210687, accumulatedHistogram.GetMaxValue());
-            Assert.Equal(1441812279.474, reader.GetStartTime().SecondsSinceUnixEpoch());
         }
 
         [Theory]
@@ -179,26 +181,27 @@ namespace HdrHistogram.UnitTests.Persistence
             int expectedCombined999, long expectedCombinedMaxLength,
             double expectedStartTime)
         {
-            var readerStream = GetEmbeddedFileStream(logPath);
-            var reader = new HistogramLogReader(readerStream);
-
-            int histogramCount = 0;
-            long totalCount = 0;
-            var accumulatedHistogram = Create(OneHourOfNanoseconds, DefaultSignificantDigits);
-            var histograms = ((IHistogramLogV1Reader)reader).ReadHistograms()
-                .Skip(skip)
-                .Take(take);
-            foreach (var histogram in histograms)
+            using (var readerStream = GetEmbeddedFileStream(logPath))
+            using (var reader = new HistogramLogReader(readerStream))
             {
-                histogramCount++;
-                totalCount += histogram.TotalCount;
-                accumulatedHistogram.Add(histogram);
+                int histogramCount = 0;
+                long totalCount = 0;
+                var accumulatedHistogram = Create(OneHourOfNanoseconds, DefaultSignificantDigits);
+                var histograms = ((IHistogramLogV1Reader)reader).ReadHistograms()
+                    .Skip(skip)
+                    .Take(take);
+                foreach (var histogram in histograms)
+                {
+                    histogramCount++;
+                    totalCount += histogram.TotalCount;
+                    accumulatedHistogram.Add(histogram);
+                }
+                Assert.Equal(expectedHistogramCount, histogramCount);
+                Assert.Equal(expectedCombinedValueCount, totalCount);
+                Assert.Equal(expectedCombined999, accumulatedHistogram.GetValueAtPercentile(99.9));
+                Assert.Equal(expectedCombinedMaxLength, accumulatedHistogram.GetMaxValue());
+                Assert.Equal(expectedStartTime, reader.GetStartTime().SecondsSinceUnixEpoch());
             }
-            Assert.Equal(expectedHistogramCount, histogramCount);
-            Assert.Equal(expectedCombinedValueCount, totalCount);
-            Assert.Equal(expectedCombined999, accumulatedHistogram.GetValueAtPercentile(99.9));
-            Assert.Equal(expectedCombinedMaxLength, accumulatedHistogram.GetMaxValue());
-            Assert.Equal(expectedStartTime, reader.GetStartTime().SecondsSinceUnixEpoch());
         }
 
         [Theory]
