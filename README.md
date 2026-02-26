@@ -1,10 +1,10 @@
-<img style="float: right;" align="right" height=64 src="https://raw.githubusercontent.com/HdrHistogram/HdrHistogram.NET/master/HdrHistogram-icon-64x64.png" alt="HdrHistorgram.NET logo">
+<img style="float: right;" align="right" height=64 src="https://raw.githubusercontent.com/HdrHistogram/HdrHistogram.NET/main/HdrHistogram-icon-64x64.png" alt="HdrHistorgram.NET logo">
 
 # HdrHistogram
 
 A High Dynamic Range (HDR) Histogram
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/HdrHistogram/HdrHistogram?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build status](https://ci.appveyor.com/api/projects/status/q0o5faahigq6u4qe/branch/master?svg=true)](https://ci.appveyor.com/project/LeeCampbell/hdrhistogram-net/branch/master) [![Build status](https://ci.appveyor.com/api/projects/status/q0o5faahigq6u4qe?svg=true)](https://ci.appveyor.com/project/LeeCampbell/hdrhistogram-net)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/HdrHistogram/HdrHistogram?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Build status](https://ci.appveyor.com/api/projects/status/q0o5faahigq6u4qe/branch/main?svg=true)](https://ci.appveyor.com/project/LeeCampbell/hdrhistogram-net/branch/main) [![Build status](https://ci.appveyor.com/api/projects/status/q0o5faahigq6u4qe?svg=true)](https://ci.appveyor.com/project/LeeCampbell/hdrhistogram-net)
 
 ## What is it
 
