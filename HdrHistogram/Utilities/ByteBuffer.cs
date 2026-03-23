@@ -9,7 +9,10 @@
  */
 
 using System;
+using System.Buffers.Binary;
+#if NETSTANDARD2_0
 using System.Net;
+#endif
 
 namespace HdrHistogram.Utilities
 {
@@ -108,8 +111,12 @@ namespace HdrHistogram.Utilities
         /// <returns>The value of the <see cref="short"/> at the current position.</returns>
         public short GetShort()
         {
+#if NETSTANDARD2_0
             var shortValue = IPAddress.HostToNetworkOrder(BitConverter.ToInt16(_internalBuffer, Position));
-            Position += (sizeof(short));
+#else
+            var shortValue = BinaryPrimitives.ReadInt16BigEndian(new ReadOnlySpan<byte>(_internalBuffer, Position, sizeof(short)));
+#endif
+            Position += sizeof(short);
             return shortValue;
         }
 
@@ -119,7 +126,11 @@ namespace HdrHistogram.Utilities
         /// <returns>The value of the <see cref="int"/> at the current position.</returns>
         public int GetInt()
         {
+#if NETSTANDARD2_0
             var intValue = IPAddress.HostToNetworkOrder(BitConverter.ToInt32(_internalBuffer, Position));
+#else
+            var intValue = BinaryPrimitives.ReadInt32BigEndian(new ReadOnlySpan<byte>(_internalBuffer, Position, sizeof(int)));
+#endif
             Position += sizeof(int);
             return intValue;
         }
@@ -130,7 +141,11 @@ namespace HdrHistogram.Utilities
         /// <returns>The value of the <see cref="long"/> at the current position.</returns>
         public long GetLong()
         {
+#if NETSTANDARD2_0
             var longValue = IPAddress.HostToNetworkOrder(BitConverter.ToInt64(_internalBuffer, Position));
+#else
+            var longValue = BinaryPrimitives.ReadInt64BigEndian(new ReadOnlySpan<byte>(_internalBuffer, Position, sizeof(long)));
+#endif
             Position += sizeof(long);
             return longValue;
         }
@@ -141,89 +156,26 @@ namespace HdrHistogram.Utilities
         /// <returns>The value of the <see cref="double"/> at the current position.</returns>
         public double GetDouble()
         {
-            var doubleValue = Int64BitsToDouble(ToInt64(_internalBuffer, Position));
+#if NETSTANDARD2_0
+            var doubleValue = BitConverter.Int64BitsToDouble(ReadInt64BigEndian(_internalBuffer, Position));
+#else
+            var doubleValue = BinaryPrimitives.ReadDoubleBigEndian(new ReadOnlySpan<byte>(_internalBuffer, Position, sizeof(double)));
+#endif
             Position += sizeof(double);
             return doubleValue;
         }
 
-        /// <summary>
-        /// Converts the specified 64-bit signed integer to a double-precision 
-        /// floating point number. Note: the endianness of this converter does not
-        /// affect the returned value.
-        /// </summary>
-        /// <param name="value">The number to convert. </param>
-        /// <returns>A double-precision floating point number whose value is equivalent to value.</returns>
-        private static double Int64BitsToDouble(long value)
-        {
-            return BitConverter.Int64BitsToDouble(value);
-        }
-
-        /// <summary>
-        /// Returns a 64-bit signed integer converted from eight bytes at a specified position in a byte array.
-        /// </summary>
-        /// <param name="value">An array of bytes.</param>
-        /// <param name="startIndex">The starting position within value.</param>
-        /// <returns>A 64-bit signed integer formed by eight bytes beginning at startIndex.</returns>
-        private static long ToInt64(byte[] value, int startIndex)
-        {
-            return CheckedFromBytes(value, startIndex, 8);
-        }
-
-        /// <summary>
-        /// Checks the arguments for validity before calling FromBytes
-        /// (which can therefore assume the arguments are valid).
-        /// </summary>
-        /// <param name="value">The bytes to convert after checking</param>
-        /// <param name="startIndex">The index of the first byte to convert</param>
-        /// <param name="bytesToConvert">The number of bytes to convert</param>
-        /// <returns></returns>
-        private static long CheckedFromBytes(byte[] value, int startIndex, int bytesToConvert)
-        {
-            CheckByteArgument(value, startIndex, bytesToConvert);
-            return FromBytes(value, startIndex, bytesToConvert);
-        }
-
-        /// <summary>
-        /// Checks the given argument for validity.
-        /// </summary>
-        /// <param name="value">The byte array passed in</param>
-        /// <param name="startIndex">The start index passed in</param>
-        /// <param name="bytesRequired">The number of bytes required</param>
-        /// <exception cref="ArgumentNullException">value is a null reference</exception>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// startIndex is less than zero or greater than the length of value minus bytesRequired.
-        /// </exception>
-        private static void CheckByteArgument(byte[] value, int startIndex, int bytesRequired)
-        {
-#pragma warning disable CA1510
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-#pragma warning restore CA1510
-            if (startIndex < 0 || startIndex > value.Length - bytesRequired)
-            {
-                throw new ArgumentOutOfRangeException(nameof(startIndex));
-            }
-        }
-
-        /// <summary>
-        /// Returns a value built from the specified number of bytes from the given buffer,
-        /// starting at index.
-        /// </summary>
-        /// <param name="buffer">The data in byte array format</param>
-        /// <param name="startIndex">The first index to use</param>
-        /// <param name="bytesToConvert">The number of bytes to use</param>
-        /// <returns>The value built from the given bytes</returns>
-        private static long FromBytes(byte[] buffer, int startIndex, int bytesToConvert)
+#if NETSTANDARD2_0
+        private static long ReadInt64BigEndian(byte[] buffer, int startIndex)
         {
             long ret = 0;
-            for (int i = 0; i < bytesToConvert; i++)
+            for (int i = 0; i < 8; i++)
             {
                 ret = unchecked((ret << 8) | buffer[startIndex + i]);
             }
             return ret;
         }
+#endif
 
         /// <summary>
         /// Writes a byte value to the current position, and advances the position by one.
@@ -240,9 +192,14 @@ namespace HdrHistogram.Utilities
         /// <param name="value">The value to set the current position to.</param>
         public void PutInt(int value)
         {
+#if NETSTANDARD2_0
             var intAsBytes = BitConverter.GetBytes(IPAddress.NetworkToHostOrder(value));
             Array.Copy(intAsBytes, 0, _internalBuffer, Position, intAsBytes.Length);
             Position += intAsBytes.Length;
+#else
+            BinaryPrimitives.WriteInt32BigEndian(new Span<byte>(_internalBuffer, Position, sizeof(int)), value);
+            Position += sizeof(int);
+#endif
         }
 
         /// <summary>
@@ -255,8 +212,12 @@ namespace HdrHistogram.Utilities
         /// </remarks>
         public void PutInt(int index, int value)
         {
+#if NETSTANDARD2_0
             var intAsBytes = BitConverter.GetBytes(IPAddress.NetworkToHostOrder(value));
             Array.Copy(intAsBytes, 0, _internalBuffer, index, intAsBytes.Length);
+#else
+            BinaryPrimitives.WriteInt32BigEndian(new Span<byte>(_internalBuffer, index, sizeof(int)), value);
+#endif
             // We don't increment the Position as this is an explicit write.
         }
 
@@ -266,9 +227,14 @@ namespace HdrHistogram.Utilities
         /// <param name="value">The value to set the current position to.</param>
         public void PutLong(long value)
         {
+#if NETSTANDARD2_0
             var longAsBytes = BitConverter.GetBytes(IPAddress.NetworkToHostOrder(value));
             Array.Copy(longAsBytes, 0, _internalBuffer, Position, longAsBytes.Length);
             Position += longAsBytes.Length;
+#else
+            BinaryPrimitives.WriteInt64BigEndian(new Span<byte>(_internalBuffer, Position, sizeof(long)), value);
+            Position += sizeof(long);
+#endif
         }
 
         /// <summary>
@@ -277,11 +243,15 @@ namespace HdrHistogram.Utilities
         /// <param name="value">The value to set the current position to.</param>
         public void PutDouble(double value)
         {
-            //PutDouble(ix(CheckIndex(i, (1 << 3))), x);
+#if NETSTANDARD2_0
             var doubleAsBytes = BitConverter.GetBytes(value);
             Array.Reverse(doubleAsBytes);
             Array.Copy(doubleAsBytes, 0, _internalBuffer, Position, doubleAsBytes.Length);
             Position += doubleAsBytes.Length;
+#else
+            BinaryPrimitives.WriteDoubleBigEndian(new Span<byte>(_internalBuffer, Position, sizeof(double)), value);
+            Position += sizeof(double);
+#endif
         }
 
         /// <summary>
